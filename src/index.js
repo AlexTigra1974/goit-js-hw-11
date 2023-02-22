@@ -6,14 +6,13 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import NewsApiService from './newsApiService';
 
 const form = document.querySelector('#search-form');
-console.log(form);
-const inputSearch = document.querySelector('input[name = "searchQuery"]');
-console.log(inputSearch);
-const btnSearch = document.querySelector('[type="submit"]');
-// console.log(btnSearch);
+
+// const inputSearch = document.querySelector('input[name = "searchQuery"]');
+// const btnSearch = document.querySelector('[type="submit"]');
+
 const gallery = document.querySelector('.gallery');
 const btnLoadMore = document.querySelector('.load-more');
-// console.log(btnLoadMore);
+
 const newsApiService = new NewsApiService();
 
 const lightbox = new SimpleLightbox('.gallery a', {
@@ -21,7 +20,6 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
   enableKeyboard: true,
 });
-console.log(lightbox);
 
 form.addEventListener('submit', onSearch);
 btnLoadMore.addEventListener('click', onLoadMore);
@@ -29,6 +27,7 @@ btnLoadMore.addEventListener('click', onLoadMore);
 async function onSearch(e) {
   e.preventDefault();
   clearMarkup();
+
   btnLoadMore.hidden = true;
 
   newsApiService.query = e.target.elements.searchQuery.value.trim();
@@ -37,16 +36,14 @@ async function onSearch(e) {
       'Sorry, there are no images matching your search query. Please try again.'
     );
   }
-  console.log(newsApiService.query);
 
   newsApiService.resetPage();
+
   try {
     const data = await newsApiService.fetchImages();
-    console.log(data);
+
     const hits = data.hits;
-    console.log(hits);
     const totalHits = data.totalHits;
-    console.log(totalHits);
 
     createMarkup(hits);
 
@@ -56,30 +53,45 @@ async function onSearch(e) {
       );
       return;
     }
+
+    btnLoadMore.hidden = false;
+
     if (totalHits > 0) {
       Notiflix.Notify.info(`Hooray! We found ${totalHits} images.`);
     }
 
-    btnLoadMore.hidden = false;
+    if (hits.length < 40) {
+      btnLoadMore.hidden = true;
+      setTimeout(() => {
+        Notiflix.Notify.warning(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }, 2000);
+    }
+
     lightbox.refresh();
   } catch (err) {
     console.error(err);
   }
 }
+
 async function onLoadMore() {
   try {
     const data = await newsApiService.fetchImages();
-
     const hits = data.hits;
-    console.log(hits);
 
     createMarkup(hits);
-    if (hits.length === 0) {
-      Notiflix.Notify.warning(
-        "We're sorry, but you've reached the end of search results."
-      );
+
+    if (hits.length < 40) {
       btnLoadMore.hidden = true;
+      setTimeout(() => {
+        Notiflix.Notify.warning(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }, 2000);
     }
+
+    lightbox.refresh();
   } catch (err) {
     console.error(err);
   }
@@ -123,6 +135,7 @@ function createMarkup(arr) {
     )
     .join('');
   gallery.insertAdjacentHTML('beforeend', markup);
+  onScroll();
 }
 
 function clearMarkup() {
@@ -138,7 +151,6 @@ function onScroll() {
     behavior: 'smooth',
   });
 }
-onScroll();
 
 //   q: 'seach',
 //   image_type: 'photo',

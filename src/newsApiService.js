@@ -1,4 +1,3 @@
-import Notiflix, { Notify } from 'notiflix';
 import axios from 'axios';
 export default class NewsApiService {
   constructor() {
