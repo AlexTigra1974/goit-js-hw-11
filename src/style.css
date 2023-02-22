@@ -10,6 +10,7 @@ p,
 body {
   margin: 0;
 }
+
 a {
   text-decoration: none;
   color: inherit;
@@ -69,6 +70,7 @@ input[type='text'] {
   color: #fff;
   border-radius: 8px;
   cursor: progress;
+  margin-bottom: 30px;
 }
 .load-more:hover,
 .load-more:focus {
